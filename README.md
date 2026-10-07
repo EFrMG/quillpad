@@ -17,7 +17,7 @@ quillpad search flour
 quillpad export groceries --format html > groceries.html
 ```
 
-Notes live in `~/.quillpad`. Each one starts with a small header:
+Notes live in `~/.quillpad/notes.db`, a SQLite database with full-text search. A Markdown copy of each note is still written next to it:
 
 ```
 title: Groceries

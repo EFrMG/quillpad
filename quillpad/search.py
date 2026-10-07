@@ -10,4 +10,6 @@ def matches(note, query):
 
 
 def search(query):
-    return [note for note in store.load_all() if matches(note, query)]
+    from quillpad import db
+
+    return db.search(query)

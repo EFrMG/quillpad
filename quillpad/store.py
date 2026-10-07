@@ -26,6 +26,9 @@ def path_for(note):
 
 
 def save(note):
+    from quillpad import db
+
+    db.save(note)
     text = f"title: {note.title}\ntags: {' '.join(note.tags)}\n---\n{note.body}\n"
     path_for(note).write_text(text)
 
@@ -40,7 +43,9 @@ def parse(text):
 
 
 def load_all():
-    return [parse(path.read_text()) for path in sorted(home().iterdir()) if path.suffix == ".md"]
+    from quillpad import db
+
+    return db.load_all()
 
 
 def find(prefix):
