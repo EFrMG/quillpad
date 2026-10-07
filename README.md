@@ -5,8 +5,10 @@ A tiny command-line notebook. Notes are plain Markdown files in one directory, s
 ## Install
 
 ```sh
-pip install quillpad
+pipx install quillpad
 ```
+
+`pipx` keeps quillpad and its command in an isolated environment. Plain `pip install quillpad` works too.
 
 ## Use
 
