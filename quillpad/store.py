@@ -26,7 +26,7 @@ def path_for(note):
 
 
 def save(note):
-    text = f"title: {note.title}\ntags: {' '.join(note.tags)}\n---\n{note.body}\n"
+    text = f"title: {note.title}\ntags: {', '.join(note.tags)}\n---\n{note.body}\n"
     path_for(note).write_text(text)
 
     return path_for(note)
@@ -36,7 +36,7 @@ def parse(text):
     header, _, body = text.partition("\n---\n")
     fields = dict(line.split(": ", 1) for line in header.splitlines() if ": " in line)
 
-    return Note(title=fields.get("title", ""), body=body.rstrip("\n"), tags=fields.get("tags", "").split())
+    return Note(title=fields.get("title", ""), body=body.rstrip("\n"), tags=[tag.strip() for tag in fields.get("tags", "").split(",") if tag.strip()])
 
 
 def load_all():
