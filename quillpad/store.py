@@ -18,7 +18,10 @@ class Note:
 
 
 def home():
-    return Path(os.environ.get("QUILLPAD_HOME", Path.home() / ".quillpad"))
+    path = Path(os.environ.get("QUILLPAD_HOME", Path.home() / ".quillpad"))
+    path.mkdir(parents=True, exist_ok=True)
+
+    return path
 
 
 def path_for(note):
