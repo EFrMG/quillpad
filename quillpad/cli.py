@@ -3,7 +3,7 @@
 import argparse
 import sys
 
-from quillpad import export, search, store, tags
+from quillpad import __version__, export, search, store, tags
 
 
 def cmd_new(args):
@@ -33,6 +33,7 @@ def cmd_export(args):
 
 def build_parser():
     parser = argparse.ArgumentParser(prog="quillpad", description="A tiny command-line notebook")
+    parser.add_argument("--version", action="version", version=f"quillpad {__version__}")
     commands = parser.add_subparsers(dest="command", required=True)
 
     new = commands.add_parser("new", help="create a note")
