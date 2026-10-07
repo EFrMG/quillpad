@@ -8,8 +8,8 @@
 set -e
 
 cd "$(dirname "$0")/.."
-mkdir -p recording/.snapshots
-archive="recording/.snapshots/${2:?name the snapshot}.tgz"
+mkdir -p recording/snapshots
+archive="recording/snapshots/${2:?name the snapshot}.tgz"
 
 case "$1" in
 save)
