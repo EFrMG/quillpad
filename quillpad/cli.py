@@ -2,6 +2,7 @@
 
 import argparse
 import sys
+import time
 
 from quillpad import export, search, store, tags
 
@@ -11,11 +12,19 @@ def cmd_new(args):
     print(store.save(note))
 
 
+def age(note):
+    days = int((time.time() - store.path_for(note).stat().st_mtime) // 86400)
+    if days == 0:
+        return "today"
+
+    return f"{days}d ago"
+
+
 def cmd_list(args):
     wanted = tags.parse_filter(args.tag)
     for note in store.load_all():
         if tags.has_tags(note, wanted):
-            print(f"{note.slug:24} {note.title}")
+            print(f"{note.slug:24} {age(note):>8}  {note.title}")
 
 
 def cmd_search(args):
