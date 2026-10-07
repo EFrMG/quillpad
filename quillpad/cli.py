@@ -1,6 +1,7 @@
 """The quillpad command."""
 
 import argparse
+import json
 import sys
 
 from quillpad import export, search, store, tags
@@ -13,9 +14,13 @@ def cmd_new(args):
 
 def cmd_list(args):
     wanted = tags.parse_filter(args.tag)
-    for note in store.load_all():
-        if tags.has_tags(note, wanted):
-            print(f"{note.slug:24} {note.title}")
+    notes = [note for note in store.load_all() if tags.has_tags(note, wanted)]
+    if args.json:
+        print(json.dumps([dict(slug=note.slug, title=note.title, tags=note.tags) for note in notes], indent=2))
+        return
+
+    for note in notes:
+        print(f"{note.slug:24} {note.title}")
 
 
 def cmd_search(args):
@@ -43,6 +48,7 @@ def build_parser():
 
     listing = commands.add_parser("list", help="list notes")
     listing.add_argument("--tag", help="only notes with these comma-separated tags")
+    listing.add_argument("--json", action="store_true", help="print slug, title and tags as JSON")
     listing.set_defaults(run=cmd_list)
 
     find = commands.add_parser("search", help="search titles and bodies")

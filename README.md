@@ -13,6 +13,7 @@ pip install quillpad
 ```sh
 quillpad new "Groceries" --tag home --body "eggs, flour"
 quillpad list --tag home
+quillpad list --json | jq '.[].title'
 quillpad search flour
 quillpad export groceries --format html > groceries.html
 ```
