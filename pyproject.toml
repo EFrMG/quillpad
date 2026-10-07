@@ -1,0 +1,8 @@
+[project]
+name = "quillpad"
+version = "0.3.0"
+description = "A tiny command-line notebook"
+requires-python = ">=3.10"
+
+[project.scripts]
+quillpad = "quillpad.cli:main"
