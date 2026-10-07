@@ -17,6 +17,10 @@ class Note:
         return re.sub(r"[^a-z0-9]+", "-", self.title.lower()).strip("-")
 
 
+def slugify(value):
+    return re.sub(r"[^a-z0-9]+", "-", value.lower()).strip("-")
+
+
 def home():
     return Path(os.environ.get("QUILLPAD_HOME", Path.home() / ".quillpad"))
 
@@ -26,7 +30,7 @@ def path_for(note):
 
 
 def save(note):
-    text = f"title: {note.title}\ntags: {' '.join(note.tags)}\n---\n{note.body}\n"
+    text = f"title: {note.title}\ntags: {' '.join(slugify(tag) for tag in note.tags)}\n---\n{note.body}\n"
     path_for(note).write_text(text)
 
     return path_for(note)

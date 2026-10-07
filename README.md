@@ -17,6 +17,8 @@ quillpad search flour
 quillpad export groceries --format html > groceries.html
 ```
 
+Tags are saved as slugs, so `--tag "To do"` becomes `to-do`.
+
 Notes live in `~/.quillpad`. Each one starts with a small header:
 
 ```
