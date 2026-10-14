@@ -1,12 +1,13 @@
-"""Plain substring search over titles and bodies."""
+"""Search words across note titles and bodies."""
 
 from quillpad import store
 
 
 def matches(note, query):
-    query = query.lower()
+    terms = query.lower().split()
+    text = f"{note.title} {note.body}".lower()
 
-    return query in note.title.lower() or query in note.body.lower()
+    return any(term in text for term in terms)
 
 
 def search(query):

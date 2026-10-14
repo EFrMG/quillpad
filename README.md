@@ -19,6 +19,8 @@ quillpad search flour
 quillpad export groceries --format html > groceries.html
 ```
 
+Search requires every space-separated word to appear in the title or body, ignoring case. An empty query returns no notes. For example, `quillpad search "release desktop"` finds release notes about the desktop client.
+
 Notes live in `~/.quillpad`. Each one starts with a small header:
 
 ```

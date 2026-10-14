@@ -1,0 +1,68 @@
+name: Python checks
+on:
+  push:
+    branches:
+      - feature/notes-directory
+      - feature/search-terms
+      - ci/package-smoke
+permissions:
+  contents: read
+jobs:
+  checks:
+    name: ${{ matrix.check }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        check: [smoke, tests]
+    steps:
+      - name: Check out source
+        env:
+          CHECKOUT_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          source_dir="$RUNNER_TEMP/quillpad"
+          askpass=$(mktemp "$RUNNER_TEMP/askpass.XXXXXX")
+          trap 'rm -f "$askpass"' EXIT
+          cat > "$askpass" <<'SH'
+          #!/bin/sh
+          case "$1" in
+            *Username*) printf '%s\n' x-access-token ;;
+            *Password*) printf '%s\n' "$CHECKOUT_TOKEN" ;;
+          esac
+          SH
+          chmod 700 "$askpass"
+          export GIT_ASKPASS="$askpass" GIT_TERMINAL_PROMPT=0
+          git init "$source_dir"
+          git -C "$source_dir" remote add origin "https://github.com/${GITHUB_REPOSITORY}.git"
+          git -C "$source_dir" -c credential.helper= fetch --no-tags --depth=1 origin "$GITHUB_SHA"
+          git -C "$source_dir" checkout --detach FETCH_HEAD
+          test "$(git -C "$source_dir" rev-parse HEAD)" = "$GITHUB_SHA"
+          git -C "$source_dir" rev-parse HEAD
+      - name: Python runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 --version
+          python3 -c 'import sys; assert sys.version_info >= (3, 10), sys.version'
+      - name: Python smoke
+        if: matrix.check == 'smoke'
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/quillpad"
+          export QUILLPAD_HOME="$(mktemp -d)"
+          trap 'rm -rf "$QUILLPAD_HOME"' EXIT
+          python3 -m compileall -q quillpad
+          python3 -m quillpad.cli --help
+      - name: Unit tests
+        if: matrix.check == 'tests'
+        shell: bash
+        run: |
+          set -euo pipefail
+          export QUILLPAD_HOME="$(mktemp -d)"
+          trap 'rm -rf "$QUILLPAD_HOME"' EXIT
+          cd "$RUNNER_TEMP/quillpad"
+          python3 -m unittest discover -s tests -v
