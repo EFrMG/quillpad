@@ -7,7 +7,7 @@ def matches(note, query):
     terms = query.lower().split()
     text = f"{note.title} {note.body}".lower()
 
-    return any(term in text for term in terms)
+    return bool(terms) and all(term in text for term in terms)
 
 
 def search(query):
