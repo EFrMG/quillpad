@@ -27,9 +27,11 @@ def path_for(note):
 
 def save(note):
     text = f"title: {note.title}\ntags: {' '.join(note.tags)}\n---\n{note.body}\n"
-    path_for(note).write_text(text)
+    path = path_for(note)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(text)
 
-    return path_for(note)
+    return path
 
 
 def parse(text):
@@ -40,7 +42,11 @@ def parse(text):
 
 
 def load_all():
-    return [parse(path.read_text()) for path in sorted(home().iterdir()) if path.suffix == ".md"]
+    directory = home()
+    if not directory.exists():
+        return []
+
+    return [parse(path.read_text()) for path in sorted(directory.iterdir()) if path.suffix == ".md"]
 
 
 def find(prefix):
