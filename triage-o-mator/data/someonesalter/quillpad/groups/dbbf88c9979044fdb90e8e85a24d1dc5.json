@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "id": "dbbf88c9979044fdb90e8e85a24d1dc5",
+  "repo": "someonesalter/quillpad",
+  "title": "Tags with spaces: quote them or slugify them?",
+  "description": "Issue #2 has two fixes that cannot both land. PR #3 keeps the tag text and changes the header format; PR #4 keeps the format and changes the tag text. Maintainers need to pick one direction before either is reviewed further.",
+  "assignee": "",
+  "status": "draft",
+  "revision": 4,
+  "created_by": "agent:Maya Ortiz",
+  "created_at": "2026-10-19T14:46:18Z",
+  "updated_by": "agent:Maya Ortiz",
+  "updated_at": "2026-10-19T14:46:18Z",
+  "members": [
+    {
+      "kind": "issue",
+      "number": 2,
+      "added_by": "agent:Maya Ortiz",
+      "added_at": "2026-10-19T14:46:18Z",
+      "notes": "The report. Confirmed by a second user.",
+      "updated_by": "agent:Maya Ortiz",
+      "updated_at": "2026-10-19T14:46:18Z"
+    },
+    {
+      "kind": "pr",
+      "number": 3,
+      "added_by": "agent:Maya Ortiz",
+      "added_at": "2026-10-19T14:46:18Z",
+      "notes": "Quotes tags. Changes the header separator to commas with no migration, so existing multi-tag notes break.",
+      "updated_by": "agent:Maya Ortiz",
+      "updated_at": "2026-10-19T14:46:18Z"
+    },
+    {
+      "kind": "pr",
+      "number": 4,
+      "added_by": "agent:Maya Ortiz",
+      "added_at": "2026-10-19T14:46:18Z",
+      "notes": "Slugifies tags. Ten lines, no format change; the tag shown is no longer the text typed.",
+      "updated_by": "agent:Maya Ortiz",
+      "updated_at": "2026-10-19T14:46:18Z"
+    }
+  ]
+}
