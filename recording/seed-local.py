@@ -8,6 +8,7 @@ Run it once on a freshly synced Quillpad install with no local review work. It r
 
 import argparse
 import datetime
+import hashlib
 import json
 import os
 import subprocess
@@ -17,6 +18,8 @@ from pathlib import Path
 REPOSITORY = "someonesalter/quillpad"
 HUMAN = "Maya Ortiz"
 AGENT = "agent:Maya Ortiz"
+PR_NUMBERS = {3, 4, 8, 9, 11, 12, 13, 18, 25, 27, 28, 29}
+CLOSED_ISSUES = {23, 24}
 
 # kind, number, labels, action, reason, notes, by
 DECISIONS = [
@@ -329,7 +332,7 @@ def closure(install, number, comment, extra):
     exports.mkdir(parents=True, exist_ok=True)
     comment_file = exports / f"pr-{number}-close.md"
     comment_file.write_text(comment)
-    install.run("action-proposals", "propose", "--kind", "pr", "--number", number, "--action", "close", "--observed-state", seen["state"], "--title", seen["title"], "--head-sha", seen["head_sha"],
+    install.run("action-proposals", "propose", "--kind", "pr", "--number", number, "--action", "close", "--observed-state", seen["state"], "--title", seen["title"], "--head-sha", seen["head_sha"], "--comments", seen["comments"],
                 "--updated-at", seen["updated_at"], "--comment-file", comment_file, "--by", AGENT, "--context-checkpoint", checkpoint, "--evidence", f"pr:{number}:{snapshot}", *extra)
 
     return snapshot
@@ -339,14 +342,18 @@ def tracked(install):
     install.run("cache", "track-add", "--kind", "issue", "--number", 26)
 
 
-def preflight(install):
+def preflight(install, allow_missing_closed=False):
     rows = install.ledger()
-    pr_numbers = {3, 4, 8, 9, 11, 12, 13, 18, 25}
-    expected = {("pr" if number in pr_numbers else "issue", number) for number in range(1, 27)}
-    if len(rows) != 26 or {(row["kind"], row["number"]) for row in rows} != expected:
-        sys.exit("expected the 26 Quillpad recording items; sync and check the ledger before seeding")
+    expected = {("pr" if number in PR_NUMBERS else "issue", number) for number in range(1, 30)}
+    present = {(row["kind"], row["number"]) for row in rows}
+    allowed = {frozenset(expected)}
+    if allow_missing_closed:
+        allowed.add(frozenset(expected - {("issue", number) for number in CLOSED_ISSUES}))
 
-    if any(row.get("state") != ("closed" if row["number"] in (23, 24) else "open") for row in rows):
+    if len(rows) != len(present) or frozenset(present) not in allowed:
+        sys.exit("expected the 29 Quillpad recording items; sync and check the ledger before seeding")
+
+    if any(row.get("state") != ("closed" if row["number"] in CLOSED_ISSUES else "open") for row in rows):
         sys.exit("restore the fixture's GitHub item states and sync before seeding")
 
     local_fields = ("triaged_at", "triaged_by", "proposed_labels", "labels_reviewed", "action", "reason", "agent_notes", "maintainer_notes", "review_request", "item_score")
@@ -367,11 +374,52 @@ def preflight(install):
         sys.exit("sync the GitHub label catalog before seeding; required fixture labels are missing")
 
 
+def include_closed_issues(install):
+    install.run("fetch", "--full", *[arg for number in sorted(CLOSED_ISSUES) for arg in ("--include-item", f"issue:{number}")])
+    install.run("sync", expected=False)
+
+    raw_path = install.data / "raw/issues_and_prs.jsonl"
+    meta = json.loads((install.data / "raw/fetch_meta.json").read_text())
+    if meta.get("repo") != install.repo or meta.get("host") != "github.com" or meta.get("mode") != "full" or hashlib.sha256(raw_path.read_bytes()).hexdigest() != meta.get("raw_sha256"):
+        sys.exit("closed-item fetch is missing or corrupt; inspect the recording install")
+
+    selected = {}
+    for line in raw_path.read_text().splitlines():
+        row = json.loads(line)
+        if row.get("kind") == "issue" and row.get("number") in CLOSED_ISSUES:
+            if row.get("state") != "closed" or row.get("url") != f"https://github.com/{install.repo}/issues/{row['number']}":
+                sys.exit("recording issue closure changed; inspect GitHub before seeding")
+
+            selected[row["number"]] = row
+
+    if set(selected) != CLOSED_ISSUES:
+        sys.exit("closed recording issues were not observed in the explicit fetch")
+
+    os.environ["TRIAGE_ROOT"] = str(install.root)
+    sys.path.insert(0, str(install.root / "bin"))
+    from _storage import locked
+    from _triage import LEDGER_PATH, TRIAGE_DEFAULTS, load_ledger, save_ledger
+
+    with locked(LEDGER_PATH):
+        rows = load_ledger()
+        present = {(row["kind"], row["number"]) for row in rows}
+        for number in sorted(CLOSED_ISSUES):
+            if ("issue", number) in present:
+                continue
+
+            observed = {k: v for k, v in selected[number].items() if k not in ("body", "inventory_ids")}
+            rows.append(dict(TRIAGE_DEFAULTS, **observed, first_seen_at=meta["fetched_at"], last_synced_at=meta["fetched_at"]))
+
+        save_ledger(rows)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--install", type=Path, default=Path("triage-o-mator"))
     install = Install(parser.parse_args().install)
 
+    preflight(install, allow_missing_closed=True)
+    include_closed_issues(install)
     preflight(install)
 
     steps = [

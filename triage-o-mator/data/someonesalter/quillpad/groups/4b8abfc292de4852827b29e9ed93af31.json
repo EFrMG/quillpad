@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "id": "4b8abfc292de4852827b29e9ed93af31",
+  "repo": "someonesalter/quillpad",
+  "title": "test",
+  "description": "This is a test",
+  "assignee": "Me",
+  "status": "draft",
+  "revision": 5,
+  "created_by": "sandbox-agent",
+  "created_at": "2026-10-15T08:40:39Z",
+  "updated_by": "sandbox-agent",
+  "updated_at": "2026-10-15T08:41:24Z",
+  "members": [
+    {
+      "kind": "issue",
+      "number": 2,
+      "added_by": "sandbox-agent",
+      "added_at": "2026-10-15T08:41:24Z",
+      "notes": "",
+      "updated_by": "sandbox-agent",
+      "updated_at": "2026-10-15T08:41:24Z"
+    },
+    {
+      "kind": "pr",
+      "number": 3,
+      "added_by": "sandbox-agent",
+      "added_at": "2026-10-15T08:41:24Z",
+      "notes": "",
+      "updated_by": "sandbox-agent",
+      "updated_at": "2026-10-15T08:41:24Z"
+    },
+    {
+      "kind": "pr",
+      "number": 4,
+      "added_by": "sandbox-agent",
+      "added_at": "2026-10-15T08:41:24Z",
+      "notes": "",
+      "updated_by": "sandbox-agent",
+      "updated_at": "2026-10-15T08:41:24Z"
+    }
+  ]
+}
