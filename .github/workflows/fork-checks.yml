@@ -7,7 +7,7 @@ permissions:
 jobs:
   check:
     runs-on: ubuntu-24.04
-    timeout-minutes: 5
+    timeout-minutes: 30
     steps:
       # Actions is limited to local actions here, so the PR head is checked out by hand.
       - name: Check out the PR head
