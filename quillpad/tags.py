@@ -2,7 +2,7 @@
 
 
 def parse_filter(value):
-    return value.split(",") if value else []
+    return [tag.strip() for tag in value.split(",") if tag.strip()] if value else []
 
 
 def has_tags(note, wanted):
