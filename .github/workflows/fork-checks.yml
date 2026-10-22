@@ -1,0 +1,25 @@
+name: Fork checks
+on:
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      # Actions is limited to local actions here, so the PR head is checked out by hand.
+      - name: Check out the PR head
+        env:
+          CHECKOUT_TOKEN: ${{ github.token }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -eu
+          git init -q source
+          header="AUTHORIZATION: basic $(printf 'x-access-token:%s' "$CHECKOUT_TOKEN" | base64 -w0)"
+          git -C source -c http.extraheader="$header" fetch -q --depth=1 "https://github.com/${GITHUB_REPOSITORY}.git" "$HEAD_SHA"
+          git -C source checkout -q FETCH_HEAD
+      - name: Run checks
+        working-directory: source
+        run: ./scripts/check.sh
